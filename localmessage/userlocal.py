@@ -11,8 +11,16 @@
 """
 
 
-#变量有用户数量n 基站的通信半径r 返回的则是用户位置的横坐标和纵坐标
-def random_local(n,r) :
+# 随机分布
+# 变量有用户数量n 基站的通信半径r 返回的则是用户位置的横坐标和纵坐标
+from keyan.mypaper import random_point
 
 
-    return 0
+def random_local(n, r):
+    return random_point(n,r)
+
+
+# 泊松分布
+# 变量有用户数量n 基站的通信半径r 返回的则是用户位置的横坐标和纵坐标
+def poisson_local(n, r):
+    return
