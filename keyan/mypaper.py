@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 parameter:{
     terminal_number  用户终端个数
     radius_ 基站半径的平方
-    communcation_maxR  用户终端最大可d2d通信距离
+    communication_maxR  用户终端最大可d2d通信距离
     cache_Size  用户缓存空间大小
     file_Numbers    文件个数
     user_request_dummy_rate     虚拟用户请求文件概率
@@ -25,13 +25,13 @@ methods:{
     candi_terminal
     hit_rate
     cache_which_file
-    zipf_distrubute
+    zipf_distribute
 }
 """
 
 
 # 方法1  得到zipf分布的文件请求概率
-def zipf_distrubute(alpha, file_number):
+def zipf_distribute(alpha, file_number):
     ans = [0 for i in range(file_number)]
     sum = 0
     for i in range(1, file_number + 1):
@@ -135,12 +135,12 @@ def cache_which_file_01(dp, file_size, cache_size):
     return cache_index
 
 
-def n_is_or_not_hit_m(cache_set, n, m, n_communcation_set_n_):
+def n_is_or_not_hit_m(cache_set, n, m, n_communication_set_n_):
     if cache_set[n][m] == 1:
         return 1
 
-    for i in range(len(n_communcation_set_n_)):
-        if cache_set[n_communcation_set_n_[i]][m] == 1:
+    for i in range(len(n_communication_set_n_)):
+        if cache_set[n_communication_set_n_[i]][m] == 1:
             return 1
 
     return 0
@@ -156,15 +156,15 @@ def n_hit_possible_self(cache_set, n, m_request_set):
 
 
 # 公式(2)的实现  用户n的d2d命中概率
-def n_hit_possible_D2D(cache_set, n, m_request_set, n_communcation_set_n_):
+def n_hit_possible_d2d(cache_set, n, m_request_set, n_communication_set_n_):
     P = 0
     for i in range(len(m_request_set[n])):
         if cache_set[n][i] == 1:
             continue
-        for j in range(len(n_communcation_set_n_)):
-            if n_communcation_set_n_ == n:
+        for j in range(len(n_communication_set_n_)):
+            if n_communication_set_n_ == n:
                 continue
-            if cache_set[n_communcation_set_n_[j]][i] == 1:
+            if cache_set[n_communication_set_n_[j]][i] == 1:
                 P += m_request_set[n][i]
                 break
 
@@ -172,30 +172,30 @@ def n_hit_possible_D2D(cache_set, n, m_request_set, n_communcation_set_n_):
 
 
 # 公式(3)的实现
-def n_hit_possbile_no_BS(cache_set, n, m_request_set, n_communcation_set_n_):
-    return n_hit_possible_self(cache_set, n, m_request_set) + n_hit_possible_D2D(cache_set, n, m_request_set,
-                                                                                 n_communcation_set_n_)
+def n_hit_possbile_no_bs(cache_set, n, m_request_set, n_communication_set_n_):
+    return n_hit_possible_self(cache_set, n, m_request_set) + n_hit_possible_d2d(cache_set, n, m_request_set,
+                                                                                 n_communication_set_n_)
 
 
 # 系统的平均命中概率，这个是我们要得到的最大值
-def all_hit_possible(cache_set, n_communcation_set_n_, m_request_set):
+def all_hit_possible(cache_set, n_communication_set_n_, m_request_set):
     P = 0
     for i in range(len(cache_set)):
-        P += n_hit_possbile_no_BS(cache_set, i, m_request_set, n_communcation_set_n_[i])
+        P += n_hit_possbile_no_bs(cache_set, i, m_request_set, n_communication_set_n_[i])
 
     return P / (len(cache_set))
 
 
 # 生成 n_cache清空后 所有文件的被他缓存的价值矩阵
-def clear_n_cache_set_all_file_value(cache_set, n, n_communcation_set_n_, m_request_set):
+def clear_n_cache_set_all_file_value(cache_set, n, n_communication_set_n_, m_request_set):
     cache_set[n] = [0 for i in range(len(m_request_set[n]))]
     file_value = [0 for i in range(len(m_request_set[n]))]
 
     for h in range(len(file_value)):
         file_value[h] += m_request_set[n][h]
-        for j in range(len(n_communcation_set_n_)):
-            n_ = n_communcation_set_n_[j]
-            if n_is_or_not_hit_m(cache_set, n_, h, n_communcation_set_n_) == 0:
+        for j in range(len(n_communication_set_n_)):
+            n_ = n_communication_set_n_[j]
+            if n_is_or_not_hit_m(cache_set, n_, h, n_communication_set_n_) == 0:
                 file_value[h] += m_request_set[n_][h]
 
     return file_value
@@ -226,7 +226,7 @@ R_max = 100
 radius_ = pow(R_max, 2)
 
 # 用户属性
-communcation_maxR = 20
+communication_maxR = 20
 cache_Size = 15
 user_request_dummy_rate = 0.01
 
@@ -237,7 +237,7 @@ for i in range(len(file_size)):
     file_size[i] = random.randint(1, 5)
 file_required_by_terminal = [[0 for i in range(file_Numbers)] for j in range(terminal_number)]
 for j in range(len(file_required_by_terminal)):
-    file_required_by_terminal[j] = zipf_distrubute(random.uniform(1, 2), file_Numbers)
+    file_required_by_terminal[j] = zipf_distribute(random.uniform(1, 2), file_Numbers)
     random.shuffle(file_required_by_terminal[j])
 print(file_required_by_terminal[1])
 print(file_required_by_terminal[2])
@@ -245,23 +245,23 @@ print(file_required_by_terminal[2])
 # 用户地理位置集合
 x_set, y_set = random_point(terminal_number, radius_)
 
-# 用户通信候选用户集合 user_can_communcation_set[n]表示 用户n的候选集合
-user_can_communcation_set = candi_terminal(x_set, y_set, communcation_maxR)
+# 用户通信候选用户集合 user_can_communication_set[n]表示 用户n的候选集合
+user_can_communication_set = candi_terminal(x_set, y_set, communication_maxR)
 
 # 用户缓存文件集合
 is_cache_file_set = [[0 for i in range(file_Numbers)] for j in range(terminal_number)]
 
 for k in range(10):
     for n in range(terminal_number):
-        value = clear_n_cache_set_all_file_value(is_cache_file_set, n, user_can_communcation_set[n],
+        value = clear_n_cache_set_all_file_value(is_cache_file_set, n, user_can_communication_set[n],
                                                  file_required_by_terminal)
         reset_n_local_cache(value, file_size, cache_Size, is_cache_file_set[n])
     print(is_cache_file_set[1])
     print(is_cache_file_set[0])
-    print(all_hit_possible(is_cache_file_set, user_can_communcation_set, file_required_by_terminal))
+    print(all_hit_possible(is_cache_file_set, user_can_communication_set, file_required_by_terminal))
 
-# plt.title("user terminal distrubute version I") 
-# plt.scatter(x_set, y_set, marker='o', label="terimal")
+# plt.title("user terminal distribute version I") 
+# plt.scatter(x_set, y_set, marker='o', label="terminal")
 # plt.scatter(0, 0, marker='^', label="base station")
 # plt.legend(loc='best')
 # #plt.plot(0,0,"^",color="red")
@@ -270,7 +270,7 @@ for k in range(10):
 
 '''
 file_tag=[i for i in range(file_Numbers)]
-str= "zipf _distrubute  file_number:%d  zipf_alpha:%10.3f" %(file_Numbers,zipf_alpha)
+str= "zipf _distribute  file_number:%d  zipf_alpha:%10.3f" %(file_Numbers,zipf_alpha)
 plt.title(str)
 plt.scatter(file_tag,file_require,marker='^',label='terminal')
 plt.show()
