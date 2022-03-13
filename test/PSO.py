@@ -106,3 +106,4 @@ for i in range(maxgen):
 
 plt.plot(result)
 plt.show()
+print(result)
