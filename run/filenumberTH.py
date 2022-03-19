@@ -27,9 +27,10 @@ for variable in range(len(M_variable)):
     #%%
     # 功率和带宽的单位都为DB
     E_D2D = 20
+    B_D2D = 20
     E_BS = 20/100
     B_BS = 20/100
-    B_D2D = 20
+
 
     #
     v_min = np.log2(1 + 3.16)

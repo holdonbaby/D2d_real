@@ -11,6 +11,7 @@ y_1 = np.zeros(len(N_variable))
 y_2 = np.zeros(len(N_variable))
 y_3 = np.zeros(len(N_variable))
 y_4 = np.zeros(len(N_variable))
+y_5 = np.zeros(len(N_variable))
 
 for variable in range(len(N_variable)):
 
@@ -23,15 +24,20 @@ for variable in range(len(N_variable)):
     R_BS=100
     S=12
     #%%
-    #设置带宽默认值
-    #默认单位为MHZ
-    B_D2D = 20
-    B_BS = 20
-
-    #设置默认用户功率和基站功率
+    # %%
+    # 功率和带宽的单位都为DB
     E_D2D = 20
-    E_BS =20
-    #%% md
+    E_BS = 20 / 100
+    B_BS = 20 / 100
+    B_D2D = 20
+
+    #
+    v_min = np.log2(1 + 3.16)
+
+    # 吞吐量
+    TH_D2D = v_min * B_D2D
+    TH_BS = TH_D2D * 1 / 4
+    TH_self = TH_D2D * 3
 
     #%%
     #随机化的local message function
@@ -94,6 +100,13 @@ for variable in range(len(N_variable)):
     weight[:,0]=1
     weight[:,1]=1
 
+
+    weight_TH = np.zeros((N,3))
+    weight_TH[:, 0] = TH_self
+    weight_TH[:, 1] = TH_D2D
+    weight_TH[:, 2] =  TH_BS
+
+
     SELF = 0
     D2D = 1
     BASE = 2
@@ -109,7 +122,7 @@ for variable in range(len(N_variable)):
     #表示总的效能
     U=0
     #K表示循环论数 一定是 N的 K次方  一般里说  k=5就行了，不会比这个更高的
-    K=5
+    K=1
     #把每一轮循环的结果 存起来
     ans_U = np.zeros(K)
     U_self=0
@@ -202,6 +215,111 @@ for variable in range(len(N_variable)):
         print(U_D2D/N,U_self/N)
         ans_U[i]=U/N
 
+    # 表示总的效能
+    U_TH = 0
+    # K表示循环论数 一定是 N的 K次方  一般里说  k=5就行了，不会比这个更高的
+    K = 1
+    # 把每一轮循环的结果 存起来
+    ans_U_TH = np.zeros(K)
+    U_self_TH = 0
+    U_D2D_TH = 0
+    U_BS_TH =0
+
+    for i in range(K):
+        random_user_set = np.arange(0,N,1)
+        np.random.shuffle(random_user_set)
+        print('这是第的',i*N,'轮迭代')
+        #挑选一个用户 index 来是的他的缓存空间存储的对象可以使得 U全局 最大化
+        for index in random_user_set:
+            cache_U = np.zeros((M,2)) #用户 index 存入文件m 需要一个 表记录
+            cache_U_0 = np.zeros((M,2))
+            #cache_tmp矩阵表示临时表， index行全1
+            cache_tmp =cache.copy()
+            cache_tmp[index,:]=np.ones(M)
+            cache_tmp_0 = cache.copy()
+            cache_tmp_0[index,:]=np.zeros(M)
+            #
+            hit_nums = np.zeros((N,M))
+            hit_nums_0 = np.zeros((N,M))
+            for n in range(N):
+                if communication[index,n]==0: #过滤所有的不能于index 通信的n
+                    continue
+                for n_nearby in range(N):
+                    if communication[n,n_nearby]==0:
+                        continue
+                    hit_nums[n,:]+=cache_tmp[n_nearby,:] #得到n所有的hit数量
+            for m in range(M):
+                cache_U[m,1]=m
+                for n in range(N):
+                    if communication[index,n]==0: #过滤所有的不能于index 通信的n
+                        continue
+                    if hit_nums[n,m]>=1:
+                        if cache_tmp[n,m]==1:
+                            cache_U[m,0]+=request[n,m]*weight_TH[n,SELF]
+                        else:
+                            cache_U[m,0]+=request[n,m]*weight_TH[n,D2D]
+                    else:
+                        cache_U[m, 0] += request[n, m] * weight_TH[n, BASE]
+
+            for n in range(N):
+                if communication[index,n]==0: #过滤所有的不能于index 通信的n
+                    continue
+                for n_nearby in range(N):
+                    if communication[n,n_nearby]==0:
+                        continue
+                    hit_nums_0[n,:]+=cache_tmp_0[n_nearby,:] #得到n所有的hit数量
+            for m in range(M):
+                cache_U_0[m,1]=m
+                for n in range(N):
+                    if communication[index,n]==0: #过滤所有的不能于index 通信的n
+                        continue
+                    if hit_nums_0[n,m]>=1:
+                        if cache_tmp_0[n,m]==1:
+                            cache_U_0[m,0]+=request[n,m]*weight_TH[n,SELF]
+                        else:
+                            cache_U_0[m,0]+=request[n,m]*weight_TH[n,D2D]
+                    else:
+                        cache_U_0[m, 0] += request[n, m] * weight_TH[n, BASE]
+
+
+            cache_U[:,0] -= cache_U_0[:,0]
+
+            sort_cache_U=cache_U[np.lexsort(-cache_U[:,::-1].T)]
+            cache[index,:]=np.zeros(M)
+            for ca in range(S):
+
+                add=sort_cache_U[ca,1]
+                cache[index,int(add)]=1
+                #print('用户：',index,'  存储下标:',add)
+
+
+        hit_nums=np.zeros((N,M))
+        U_self_TH=0
+        U_D2D_TH = 0
+        U_BS_TH=0
+        #print(cache.sum()==N*S)
+        for n in range(N):
+            for n_nearby in range(N):
+                if communication[n,n_nearby]==0:
+                    continue
+                hit_nums[n,:]+=cache[n_nearby,:]
+                #print(cache[n_nearby].sum())
+            #print(hit_nums[n].sum())
+        #print(hit_nums.sum())
+        for n in range(N):
+            for m in range(M):
+                if hit_nums[n,m]>=1:
+                    if cache[n,m]==1:
+                        U_self_TH+=request[n,m]*weight[n,SELF]
+                    else:
+                        U_D2D_TH+=request[n,m]*weight[n,D2D]
+                else:
+                    U_BS_TH+=request[n,m]*weight[n,BASE]
+
+        print((U_D2D_TH+U_self_TH+U_BS_TH)/N)
+        print(U_D2D_TH/N,U_self_TH/N,U_BS_TH/N)
+        ans_U_TH[i]=(U_D2D_TH+U_self_TH+U_BS_TH)/N
+
 
 
     #%%
@@ -227,6 +345,7 @@ for variable in range(len(N_variable)):
     hit_nums=np.zeros((N,M))
     U_self_self=0
     U_self_D2D=0
+    U_self_BASE = 0
     #print(cache.sum()==N*S)
     for n in range(N):
         for n_nearby in range(N):
@@ -243,7 +362,9 @@ for variable in range(len(N_variable)):
                     U_self_self+=request[n,m]*weight[n,SELF]
                 else:
                     U_self_D2D+=request[n,m]*weight[n,D2D]
-    print((U_self_self+U_self_D2D)/N)
+            else:
+                U_self_BASE+=request[n,m]*weight[n,BASE]
+    print((U_self_self+U_self_D2D+U_self_BASE)/N)
 
     #%% md
 
@@ -364,10 +485,12 @@ for variable in range(len(N_variable)):
     print('self：',(U_self_D2D+U_self_self)/N)
     print('BS global：',(U_BS_global_self+U_BS_global_D2D)/N)
     print('World global：',(U_world_global_self+U_world_global_D2D)/N)
+    print('TH最大：',(U_self_TH+U_BS_TH+U_D2D_TH)/N)
     y_1[variable] = (U_self+U_D2D)/N
     y_2[variable] =(U_self_D2D+U_self_self)/N
     y_3[variable] = (U_BS_global_self+U_BS_global_D2D)/N
     y_4[variable] = (U_world_global_self+U_world_global_D2D)/N
+    y_5[variable] = (U_self_TH+U_BS_TH+U_D2D_TH)/N
 
 
 plt.title('x-user  , y-Phit')
@@ -375,6 +498,7 @@ plt.plot(N_variable,y_1)
 plt.plot(N_variable,y_2)
 plt.plot(N_variable,y_3)
 plt.plot(N_variable,y_4)
+plt.plot(N_variable,y_5)
 plt.show()
 
 
@@ -383,3 +507,4 @@ print(y_1)
 print(y_2)
 print(y_3)
 print(y_4)
+print(y_5)
