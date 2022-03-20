@@ -27,15 +27,15 @@ for variable in range(len(N_variable)):
     #%%
     # 功率和带宽的单位都为DB
     E_D2D = 20
-    E_BS = 20/100
-    B_BS = 20/100
-    B_D2D = 20
+    E_BS = 20
+    B_BS = 20/1000
+    B_D2D = (20 )*10**6
 
     #
     v_min = np.log2(1 + 3.16)
 
     # 吞吐量
-    TH_D2D = v_min * B_D2D
+    TH_D2D = (v_min * B_D2D)/N
     TH_BS = TH_D2D * 1/4
     TH_self = TH_D2D * 3
     #%% md
@@ -200,6 +200,7 @@ for variable in range(len(N_variable)):
         hit_nums=np.zeros((N,M))
         U_self=0
         U_D2D = 0
+        U_BASE =0
         #print(cache.sum()==N*S)
         for n in range(N):
             for n_nearby in range(N):
@@ -501,11 +502,12 @@ for variable in range(len(N_variable)):
     print('self：',(U_self_D2D+U_self_self)/N)
     print('BS global：',(U_BS_global_self+U_BS_global_D2D)/N)
     print('World global：',(U_world_global_self+U_world_global_D2D)/N)
-    y_1[variable] = (U_self+U_D2D+U_self_BASE)/N
-    y_2[variable] =(U_self_D2D+U_self_self+U_self_BASE)/N
-    y_3[variable] = (U_BS_global_self+U_BS_global_D2D+U_BS_global_BASE)/N
-    y_4[variable] = (U_world_global_self+U_world_global_D2D+U_world_global_BASE)/N
-    y_5[variable] = (U_D2D_P+U_self_P+U_BASE_P)/N
+    print('命中概率最优：' ,(U_D2D_P+U_self_P+U_BASE_P)/N)
+    y_1[variable] = (U_self+U_D2D+U_BASE)
+    y_2[variable] =(U_self_D2D+U_self_self+U_self_BASE)
+    y_3[variable] = (U_BS_global_self+U_BS_global_D2D+U_BS_global_BASE)
+    y_4[variable] = (U_world_global_self+U_world_global_D2D+U_world_global_BASE)
+    y_5[variable] = (U_D2D_P+U_self_P+U_BASE_P)
 
 
 plt.title('x-user number , y-TH')

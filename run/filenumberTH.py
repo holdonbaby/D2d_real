@@ -7,7 +7,7 @@ import math
 
 
 
-M_variable = np.arange(50,300,50)
+M_variable = np.arange(100,350,50)
 y_1 = np.zeros(len(M_variable))
 y_2 = np.zeros(len(M_variable))
 y_3 = np.zeros(len(M_variable))
@@ -29,7 +29,7 @@ for variable in range(len(M_variable)):
     E_D2D = 20
     B_D2D = 20
     E_BS = 20/100
-    B_BS = 20/100
+    B_D2D = (20  /N) *(10**6)
 
 
     #
@@ -200,6 +200,7 @@ for variable in range(len(M_variable)):
         hit_nums=np.zeros((N,M))
         U_self=0
         U_D2D = 0
+        U_BASE = 0
         #print(cache.sum()==N*S)
         for n in range(N):
             for n_nearby in range(N):
@@ -501,7 +502,7 @@ for variable in range(len(M_variable)):
     print('self：',(U_self_D2D+U_self_self)/N)
     print('BS global：',(U_BS_global_self+U_BS_global_D2D)/N)
     print('World global：',(U_world_global_self+U_world_global_D2D)/N)
-    y_1[variable] = (U_self+U_D2D+U_self_BASE)/N
+    y_1[variable] = (U_self+U_D2D+U_BASE)/N
     y_2[variable] =(U_self_D2D+U_self_self+U_self_BASE)/N
     y_3[variable] = (U_BS_global_self+U_BS_global_D2D+U_BS_global_BASE)/N
     y_4[variable] = (U_world_global_self+U_world_global_D2D+U_world_global_BASE)/N

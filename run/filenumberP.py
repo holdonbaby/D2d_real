@@ -6,7 +6,7 @@ import math
 
 
 
-M_variable = np.arange(100,450,50)
+M_variable = np.arange(100,350,50)
 y_1 = np.zeros(len(M_variable))
 y_2 = np.zeros(len(M_variable))
 y_3 = np.zeros(len(M_variable))
@@ -29,7 +29,7 @@ for variable in range(len(M_variable)):
     E_D2D = 20
     E_BS = 20 / 100
     B_BS = 20 / 100
-    B_D2D = 20
+    B_D2D = (20  /N) *(10**6)
 
     #
     v_min = np.log2(1 + 3.16)
@@ -198,6 +198,7 @@ for variable in range(len(M_variable)):
         hit_nums=np.zeros((N,M))
         U_self=0
         U_D2D = 0
+        U_BASE=0
         #print(cache.sum()==N*S)
         for n in range(N):
             for n_nearby in range(N):
