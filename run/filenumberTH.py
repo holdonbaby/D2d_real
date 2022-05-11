@@ -28,8 +28,8 @@ for variable in range(len(M_variable)):
     # 功率和带宽的单位都为DB
     E_D2D = 20
     B_D2D = 20
-    E_BS = 20/100
-    B_D2D = (20  /N) *(10**6)
+    E_BS = 20
+    B_D2D = (20/N) *(10**6)
 
 
     #
@@ -37,8 +37,9 @@ for variable in range(len(M_variable)):
 
     # 吞吐量
     TH_D2D = v_min * B_D2D
-    TH_BS = TH_D2D * 1 / 4
-    TH_self = TH_D2D * 3
+    TH_BS = TH_D2D * 1 / 10
+    TH_self = TH_D2D * 5
+    TH_D2D = TH_BS
     #%% md
 
     #%%

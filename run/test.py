@@ -4,32 +4,29 @@ import random
 import math
 
 
-a=[ 50, 100 ,150 ,200, 250]
-b=[0.62862239 ,0.38630159 ,0.29104522 ,0.23396765 ,0.19467652]
-c=[0.5795285 , 0.337119  , 0.24997526 ,0.19885163, 0.16806038]
-d=[0.4525061 , 0.27559677, 0.20984191 ,0.16860726, 0.14528958]
-e=[0.38098735, 0.208313 ,  0.15113326, 0.12005075, 0.10005732]
-f=[0.59644266 ,0.36563056, 0.27547895 ,0.22162462, 0.18518796]
+def random_point(car_num, radius):
+    x_index = []
+    y_index = []
+    for i in range(1, car_num + 1):
+        theta = random.random() * 2 * np.pi
+        r = random.uniform(0, radius)
+        x = math.cos(theta) * (r ** 0.5)
+        y = math.sin(theta) * (r ** 0.5)
+        x_index.append(x)
+        y_index.append(y)
 
-for i in range(len(a)):
-    b[i]*=a[i]
-    c[i] *= a[i]
-    d[i] *= a[i]
-    e[i] *= a[i]
-    f[i] *= a[i]
-
+    return x_index, y_index
 
 
-plt.title('x-user number , y-TH')
-plt.plot(a,b)
-plt.plot(a,c)
-plt.plot(a,d)
-plt.plot(a,e)
-plt.plot(a,f)
+x_set,y_set = random_point(100,100**2)
+
+theta = np.linspace(0, 2 * np.pi, 100)
+x = np.cos(theta)
+y = np.sin(theta)
+plt.plot(x,y)
+plt.title("user terminal distribute")
+plt.scatter(x_set, y_set, marker='o', label="terminal")
+plt.scatter(0, 0, marker='^', label="Base Station")
+plt.legend(loc='best')
+#plt.plot(0,0,"^",color="red")
 plt.show()
-
-print(b)
-print(c)
-print(d)
-print(e)
-print(f)

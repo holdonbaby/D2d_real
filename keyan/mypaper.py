@@ -225,7 +225,7 @@ file_Numbers = 30
 R_max = 100
 radius_ = pow(R_max, 2)
 
-# 用户属性
+# 用户属性 love
 communication_maxR = 20
 cache_Size = 15
 user_request_dummy_rate = 0.01

@@ -37,8 +37,8 @@ for variable in range(len(S_variable)):
 
     # 吞吐量
     TH_D2D = v_min * B_D2D
-    TH_BS = TH_D2D * 1 / 4
-    TH_self = TH_D2D * 3
+    TH_BS = TH_D2D * 1 / 10
+    TH_self = TH_D2D 
 
     #%%
     #随机化的local message function
